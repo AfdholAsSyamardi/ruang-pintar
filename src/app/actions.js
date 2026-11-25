@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import pool from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
+import { parsePositiveInt } from "@/lib/validation";
 
 export async function enrollCourse(formData) {
   const user = await getCurrentUser();
@@ -12,15 +13,24 @@ export async function enrollCourse(formData) {
     redirect("/login");
   }
 
-  const courseId = Number(formData.get("course_id"));
-  const redirectTo = formData.get("redirect_to")?.toString();
+  const courseId = parsePositiveInt(formData.get("course_id")?.toString());
+  const redirectToRaw = formData.get("redirect_to")?.toString() || "";
+  const safeRedirectTo = redirectToRaw.startsWith("/") ? redirectToRaw : "";
 
-  if (user.role !== "student") {
-    redirect(Number.isInteger(courseId) && courseId > 0 ? `/courses/${courseId}` : "/courses");
+  if (!courseId) {
+    redirect("/courses");
   }
 
-  if (!Number.isInteger(courseId) || courseId <= 0) {
-    return;
+  if (user.role !== "student") {
+    redirect(`/courses/${courseId}`);
+  }
+
+  const { rows: courseRows } = await pool.query(
+    "SELECT id FROM courses WHERE id = $1",
+    [courseId]
+  );
+  if (courseRows.length === 0) {
+    redirect("/courses");
   }
 
   await pool.query(
@@ -34,8 +44,8 @@ export async function enrollCourse(formData) {
   revalidatePath("/profile");
   revalidatePath("/dashboard");
 
-  if (redirectTo) {
-    redirect(redirectTo);
+  if (safeRedirectTo) {
+    redirect(safeRedirectTo);
   }
 }
 
@@ -45,16 +55,26 @@ export async function markAsDone(formData) {
     redirect("/login");
   }
 
-  const courseId = Number(formData.get("course_id"));
-  const contentId = Number(formData.get("content_id"));
-  const nextContentId = Number(formData.get("next_content_id"));
+  const courseId = parsePositiveInt(formData.get("course_id")?.toString());
+  const contentId = parsePositiveInt(formData.get("content_id")?.toString());
+  const nextContentId = parsePositiveInt(
+    formData.get("next_content_id")?.toString()
+  );
 
-  if (user.role !== "student") {
-    redirect(Number.isInteger(courseId) && courseId > 0 ? `/courses/${courseId}` : "/courses");
+  if (!courseId) {
+    redirect("/courses");
   }
 
-  if (!Number.isInteger(courseId) || !Number.isInteger(contentId)) {
-    return;
+  if (user.role !== "student" || !contentId) {
+    redirect(`/courses/${courseId}`);
+  }
+
+  const { rows: contentRows } = await pool.query(
+    "SELECT id FROM course_contents WHERE id = $1 AND course_id = $2",
+    [contentId, courseId]
+  );
+  if (contentRows.length === 0) {
+    redirect(`/courses/${courseId}`);
   }
 
   let { rows: enrollRows } = await pool.query(
@@ -121,12 +141,13 @@ export async function markAsDone(formData) {
     }
   }
 
+  revalidatePath("/");
   revalidatePath(`/courses/${courseId}`);
   revalidatePath("/courses");
   revalidatePath("/profile");
   revalidatePath("/dashboard");
 
-  if (Number.isInteger(nextContentId) && nextContentId > 0) {
+  if (nextContentId) {
     redirect(`/courses/${courseId}?materi=${nextContentId}`);
   } else {
     redirect(`/courses/${courseId}?materi=${contentId}`);
@@ -139,16 +160,20 @@ export async function addComment(formData) {
     redirect("/login");
   }
 
-  const courseId = Number(formData.get("course_id"));
-  const contentId = Number(formData.get("content_id"));
+  const courseId = parsePositiveInt(formData.get("course_id")?.toString());
+  const contentId = parsePositiveInt(formData.get("content_id")?.toString());
   const commentText = (formData.get("comment_text") || "").toString().trim();
 
-  if (
-    !Number.isInteger(courseId) ||
-    !Number.isInteger(contentId) ||
-    !commentText
-  ) {
+  if (!courseId || !contentId || !commentText) {
     return;
+  }
+
+  const { rows: contentRows } = await pool.query(
+    "SELECT id FROM course_contents WHERE id = $1 AND course_id = $2",
+    [contentId, courseId]
+  );
+  if (contentRows.length === 0) {
+    redirect(`/courses/${courseId}`);
   }
 
   await pool.query(
@@ -166,11 +191,11 @@ export async function deleteComment(formData) {
     redirect("/login");
   }
 
-  const commentId = Number(formData.get("comment_id"));
-  const courseId = Number(formData.get("course_id"));
-  const contentId = Number(formData.get("content_id"));
+  const commentId = parsePositiveInt(formData.get("comment_id")?.toString());
+  const courseId = parsePositiveInt(formData.get("course_id")?.toString());
+  const contentId = parsePositiveInt(formData.get("content_id")?.toString());
 
-  if (!Number.isInteger(commentId)) return;
+  if (!commentId || !courseId || !contentId) return;
 
   if (user.role === "admin") {
     await pool.query("DELETE FROM comments WHERE id = $1", [commentId]);
@@ -194,8 +219,8 @@ export async function unenrollCourse(formData) {
     redirect("/profile");
   }
 
-  const courseId = Number(formData.get("course_id"));
-  if (!Number.isInteger(courseId) || courseId <= 0) {
+  const courseId = parsePositiveInt(formData.get("course_id")?.toString());
+  if (!courseId) {
     redirect("/profile");
   }
 
@@ -218,5 +243,6 @@ export async function unenrollCourse(formData) {
   revalidatePath("/courses");
   revalidatePath(`/courses/${courseId}`);
   revalidatePath("/profile");
+  revalidatePath("/dashboard");
   redirect("/profile");
 }
