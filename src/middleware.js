@@ -6,18 +6,12 @@ export async function middleware(request) {
 
   const isProtectedRoute =
     path.startsWith("/dashboard") || path.startsWith("/profile");
-  const isAuthRoute = path === "/login" || path === "/register";
 
   const cookie = request.cookies.get(SESSION_COOKIE_NAME)?.value;
   const session = await decrypt(cookie);
 
   if (isProtectedRoute && !session) {
     return NextResponse.redirect(new URL("/login", request.nextUrl));
-  }
-
-  if (isAuthRoute && session) {
-    const dest = session.role === "student" ? "/profile" : "/dashboard";
-    return NextResponse.redirect(new URL(dest, request.nextUrl));
   }
 
   return NextResponse.next();

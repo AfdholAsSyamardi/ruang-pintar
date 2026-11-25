@@ -29,13 +29,7 @@ export async function getCurrentUser() {
        WHERE id = $1`,
       [session.id]
     );
-    const user = rows[0] || null;
-    if (user && (user.role === "teacher" || user.role === "admin")) {
-      await pool.query("DELETE FROM enrollments WHERE student_id = $1", [
-        user.id,
-      ]);
-    }
-    return user;
+    return rows[0] || null;
   } catch (error) {
     console.error("Gagal mengambil user saat ini:", error);
     return null;
