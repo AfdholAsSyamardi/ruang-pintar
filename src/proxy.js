@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { decrypt, SESSION_COOKIE_NAME } from "./lib/session";
 
-export async function middleware(request) {
+export async function proxy(request) {
   const path = request.nextUrl.pathname;
 
   const isProtectedRoute =

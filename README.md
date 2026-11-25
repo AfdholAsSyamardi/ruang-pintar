@@ -15,7 +15,7 @@
 ### 2. Autentikasi & Otorisasi (RBAC)
 - **Registrasi Akun (`/register`)**: Pengguna dapat mendaftar sebagai **Student** atau mengajukan diri sebagai **Teacher** (pendaftar Teacher otomatis masuk dengan `role = 'student'` dan `status = 'pending'` hingga diverifikasi oleh Admin).
 - **Keamanan Kata Sandi & Sesi**: Password di-hash menggunakan `bcryptjs` dan sesi pengguna disimpan menggunakan **JWT (`jose`, HS256, masa berlaku 24 jam)** di dalam HTTP-Only Cookie bernama `ruangpintar_session`.
-- **Proteksi Rute (`src/middleware.js`)**: Mengarahkan pengguna yang belum login ke `/login` saat mengakses `/dashboard/*` atau `/profile`, serta mengarahkan pengguna yang sudah login keluar dari `/login` dan `/register` sesuai perannya.
+- **Proteksi Rute (`src/proxy.js`)**: Mengarahkan pengguna yang belum login ke `/login` saat mengakses `/dashboard/*` atau `/profile` (menggunakan konvensi Proxy resmi Next.js 16), sementara pengguna yang sudah login otomatis diarahkan dari `/login` dan `/register` sesuai perannya.
 
 ### 3. Peran Student (Siswa)
 - **Enroll & Unenroll Kursus**: Mendaftar ke kursus dari katalog/detail kursus maupun membatalkan pendaftaran (*unenroll*) dari halaman profil.
@@ -60,7 +60,7 @@ ruang-pintar/
 ├── eslint.config.mjs           # Konfigurasi ESLint
 ├── jsconfig.json               # Path alias (@/*)
 └── src/
-    ├── middleware.js           # Proteksi rute privat (/dashboard, /profile) & redirect auth
+    ├── proxy.js                # Proteksi rute privat (/dashboard, /profile) — Next.js 16 Proxy
     ├── lib/
     │   ├── db.js               # Pool koneksi PostgreSQL (pg)
     │   ├── session.js          # Enkripsi/dekripsi token JWT sesi
