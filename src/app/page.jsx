@@ -168,6 +168,7 @@ export default async function HomePage({ searchParams }) {
         </div>
 
         <CourseCatalogClient
+          key={`${searchQuery}-${categoryFilter}`}
           courses={popularCourses}
           categories={categories}
           user={user ? { id: user.id, role: user.role } : null}

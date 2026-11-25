@@ -10,6 +10,7 @@ import {
 } from "@/app/actions";
 import DeleteConfirmButton from "@/components/DeleteConfirmButton";
 import { extractYouTubeIdsFromText } from "@/lib/youtube";
+import { parsePositiveInt } from "@/lib/validation";
 
 export const dynamic = "force-dynamic";
 
@@ -55,10 +56,10 @@ export default async function CourseDetailPage({ params, searchParams }) {
   const { id } = await params;
   const sp = await searchParams;
 
-  if (!Number.isInteger(Number(id))) {
+  const courseId = parsePositiveInt(id);
+  if (!courseId) {
     notFound();
   }
-  const courseId = Number(id);
   const user = await getCurrentUser();
 
   const { rows: courseRows } = await pool.query(
@@ -133,7 +134,9 @@ export default async function CourseDetailPage({ params, searchParams }) {
     completedContentIds.has(m.id)
   ).length;
   const progressPct =
-    totalContents > 0 ? Math.round((completedCount / totalContents) * 100) : 0;
+    totalContents > 0
+      ? Math.min(100, Math.round((completedCount / totalContents) * 100))
+      : 0;
 
   let comments = [];
   if (activeContent) {
@@ -570,7 +573,7 @@ export default async function CourseDetailPage({ params, searchParams }) {
                             <div className="flex items-start justify-between gap-2 mb-2">
                               <div className="flex items-center gap-2">
                                 <span className="w-7 h-7 rounded-full bg-emerald-600 text-white text-xs font-bold flex items-center justify-center uppercase">
-                                  {cm.username.charAt(0)}
+                                  {cm.username?.charAt(0) || "U"}
                                 </span>
                                 <div>
                                   <div className="flex items-center gap-2">

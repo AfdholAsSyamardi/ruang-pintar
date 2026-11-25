@@ -6,7 +6,16 @@ import PrintCertificateButton from "@/components/PrintCertificateButton";
 export const dynamic = "force-dynamic";
 
 export default async function CertificateDetailPage({ params }) {
-  const { code } = await params;
+  const { code: rawCode } = await params;
+  let code = "";
+  try {
+    code = decodeURIComponent(rawCode || "").trim();
+  } catch {
+    notFound();
+  }
+  if (!code) {
+    notFound();
+  }
 
   const { rows } = await pool.query(
     `SELECT
@@ -45,7 +54,9 @@ export default async function CertificateDetailPage({ params }) {
           </Link>
           <div className="flex items-center gap-3">
             <Link
-              href={`/certificates/verify?code=${cert.certificate_code}`}
+              href={`/certificates/verify?code=${encodeURIComponent(
+                cert.certificate_code
+              )}`}
               className="px-4 py-2.5 rounded-xl border border-emerald-200 bg-white text-emerald-700 text-sm font-bold hover:bg-emerald-50"
             >
               Verifikasi Keaslian

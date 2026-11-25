@@ -9,26 +9,32 @@ export default async function VerifyCertificatePage({ searchParams }) {
 
   let certificate = null;
   let searched = false;
+  let dbError = false;
 
   if (code) {
     searched = true;
-    const { rows } = await pool.query(
-      `SELECT
-        cert.certificate_code,
-        cert.issued_at,
-        s.username AS student_name,
-        c.title AS course_title,
-        cat.name AS category_name,
-        t.username AS teacher_name
-       FROM certificates cert
-       JOIN users s ON cert.student_id = s.id
-       JOIN courses c ON cert.course_id = c.id
-       LEFT JOIN categories cat ON c.category_id = cat.id
-       LEFT JOIN users t ON c.teacher_id = t.id
-       WHERE UPPER(cert.certificate_code) = UPPER($1)`,
-      [code]
-    );
-    certificate = rows[0] || null;
+    try {
+      const { rows } = await pool.query(
+        `SELECT
+          cert.certificate_code,
+          cert.issued_at,
+          s.username AS student_name,
+          c.title AS course_title,
+          cat.name AS category_name,
+          t.username AS teacher_name
+         FROM certificates cert
+         JOIN users s ON cert.student_id = s.id
+         JOIN courses c ON cert.course_id = c.id
+         LEFT JOIN categories cat ON c.category_id = cat.id
+         LEFT JOIN users t ON c.teacher_id = t.id
+         WHERE UPPER(cert.certificate_code) = UPPER($1)`,
+        [code]
+      );
+      certificate = rows[0] || null;
+    } catch (error) {
+      console.error("Gagal memverifikasi sertifikat:", error);
+      dbError = true;
+    }
   }
 
   return (
@@ -48,6 +54,7 @@ export default async function VerifyCertificatePage({ searchParams }) {
 
           <form method="GET" action="/certificates/verify" className="flex flex-col sm:flex-row gap-3 mb-6">
             <input
+              key={code}
               type="text"
               name="code"
               defaultValue={code}
@@ -95,7 +102,7 @@ export default async function VerifyCertificatePage({ searchParams }) {
                 <p>
                   <span className="text-slate-500">Pengajar:</span>{" "}
                   <strong className="text-slate-900">
-                    {certificate.teacher_name}
+                    {certificate.teacher_name || "Pengajar RuangPintar"}
                   </strong>
                 </p>
                 <p>
@@ -119,7 +126,14 @@ export default async function VerifyCertificatePage({ searchParams }) {
             </div>
           )}
 
-          {searched && !certificate && (
+          {searched && dbError && (
+            <div className="bg-red-50 border border-red-200 rounded-2xl p-5 text-sm text-red-700 font-semibold">
+              Terjadi gangguan saat memeriksa sertifikat. Silakan coba lagi
+              beberapa saat.
+            </div>
+          )}
+
+          {searched && !dbError && !certificate && (
             <div className="bg-red-50 border border-red-200 rounded-2xl p-5 text-sm text-red-700 font-semibold">
               Kode sertifikat <span className="font-mono">{code}</span> tidak
               ditemukan atau tidak valid.

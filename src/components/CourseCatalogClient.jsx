@@ -120,7 +120,10 @@ export default function CourseCatalogClient({
             const completedCount = enrolledObj[course.id] || 0;
             const progressPct =
               course.content_count > 0
-                ? Math.round((completedCount / course.content_count) * 100)
+                ? Math.min(
+                    100,
+                    Math.round((completedCount / course.content_count) * 100)
+                  )
                 : 0;
 
             const mailtoHref = course.teacher_email

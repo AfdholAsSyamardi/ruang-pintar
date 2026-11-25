@@ -196,14 +196,19 @@ export default function Navbar({ user }) {
           <div className="pt-3 border-t border-slate-100 flex flex-col gap-2">
             {user ? (
               <>
-                <div className="px-4 py-2 bg-emerald-50 rounded-xl flex items-center justify-between">
-                  <span className="text-sm font-bold text-slate-800">
+                <Link
+                  href="/profile"
+                  onClick={() => setMenuOpen(false)}
+                  className="px-4 py-2 bg-emerald-50 hover:bg-emerald-100 rounded-xl flex items-center justify-between transition-colors"
+                >
+                  <span className="text-sm font-bold text-slate-800 truncate">
                     {user.username}
                   </span>
-                  <span className="text-xs font-bold uppercase text-emerald-700">
+                  <span className="text-xs font-bold uppercase text-emerald-700 shrink-0">
                     {user.role}
+                    {user.status === "pending" ? " (Pending)" : ""}
                   </span>
-                </div>
+                </Link>
                 <button
                   type="button"
                   onClick={handleLogout}

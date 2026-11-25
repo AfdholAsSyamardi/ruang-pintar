@@ -237,9 +237,13 @@ export default async function ProfilePage() {
                         {course.students.map((st) => {
                           const pct =
                             course.total_contents > 0
-                              ? Math.round(
-                                  (st.completed_contents / course.total_contents) *
-                                    100
+                              ? Math.min(
+                                  100,
+                                  Math.round(
+                                    (st.completed_contents /
+                                      course.total_contents) *
+                                      100
+                                  )
                                 )
                               : 0;
                           return (
@@ -346,8 +350,12 @@ export default async function ProfilePage() {
               {enrolledCourses.map((course) => {
                 const pct =
                   course.total_contents > 0
-                    ? Math.round(
-                        (course.completed_contents / course.total_contents) * 100
+                    ? Math.min(
+                        100,
+                        Math.round(
+                          (course.completed_contents / course.total_contents) *
+                            100
+                        )
                       )
                     : 0;
                 return (
