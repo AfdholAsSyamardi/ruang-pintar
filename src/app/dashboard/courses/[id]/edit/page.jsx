@@ -3,12 +3,17 @@ import { notFound, redirect } from "next/navigation";
 import pool from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { updateCourse } from "@/app/dashboard/actions";
+import { parsePositiveInt } from "@/lib/validation";
 
 export const dynamic = "force-dynamic";
 
 function toDateInputValue(d) {
   if (!d) return "";
+  if (typeof d === "string" && /^\d{4}-\d{2}-\d{2}/.test(d)) {
+    return d.slice(0, 10);
+  }
   const date = new Date(d);
+  if (Number.isNaN(date.getTime())) return "";
   const yyyy = date.getFullYear();
   const mm = String(date.getMonth() + 1).padStart(2, "0");
   const dd = String(date.getDate()).padStart(2, "0");
@@ -23,7 +28,8 @@ export default async function EditCoursePage({ params, searchParams }) {
 
   const { id } = await params;
   const sp = await searchParams;
-  if (!Number.isInteger(Number(id))) {
+  const courseId = parsePositiveInt(id);
+  if (!courseId) {
     notFound();
   }
 
@@ -32,7 +38,7 @@ export default async function EditCoursePage({ params, searchParams }) {
      FROM courses c
      LEFT JOIN users u ON c.teacher_id = u.id
      WHERE c.id = $1`,
-    [Number(id)]
+    [courseId]
   );
   const course = courseRows[0];
   if (!course) {
@@ -137,10 +143,17 @@ export default async function EditCoursePage({ params, searchParams }) {
               {currentUser.role === "admin" ? (
                 <select
                   name="teacher_id"
-                  defaultValue={course.teacher_id}
+                  defaultValue={
+                    teachers.some((t) => t.id === course.teacher_id)
+                      ? course.teacher_id
+                      : ""
+                  }
                   required
                   className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 >
+                  <option value="" disabled>
+                    -- Pilih Teacher --
+                  </option>
                   {teachers.map((t) => (
                     <option key={t.id} value={t.id}>
                       {t.username} ({t.email})

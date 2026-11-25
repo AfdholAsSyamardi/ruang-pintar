@@ -19,9 +19,8 @@ export default async function UsersManagementPage({ searchParams }) {
 
   const sp = await searchParams;
   const searchQuery = (sp?.q || "").trim();
-  const page = Math.max(1, Number(sp?.page) || 1);
+  const requestedPage = Math.max(1, Math.floor(Number(sp?.page) || 1));
   const limit = 8;
-  const offset = (page - 1) * limit;
   const successMsg = sp?.success;
   const errorMsg = sp?.error;
 
@@ -45,6 +44,8 @@ export default async function UsersManagementPage({ searchParams }) {
   );
   const totalUsers = countRes.rows[0]?.total || 0;
   const totalPages = Math.max(1, Math.ceil(totalUsers / limit));
+  const page = Math.min(requestedPage, totalPages);
+  const offset = (page - 1) * limit;
 
   const listParams = [...params, limit, offset];
   const { rows: users } = await pool.query(
@@ -186,6 +187,7 @@ export default async function UsersManagementPage({ searchParams }) {
 
           <form method="GET" action="/dashboard/users" className="flex gap-2">
             <input
+              key={searchQuery}
               type="text"
               name="q"
               defaultValue={searchQuery}
@@ -198,6 +200,14 @@ export default async function UsersManagementPage({ searchParams }) {
             >
               Cari
             </button>
+            {searchQuery && (
+              <Link
+                href="/dashboard/users"
+                className="px-3.5 py-2 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-600 text-xs font-bold flex items-center"
+              >
+                Reset
+              </Link>
+            )}
           </form>
         </div>
 

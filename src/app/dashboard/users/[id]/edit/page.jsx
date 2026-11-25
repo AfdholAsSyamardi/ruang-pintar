@@ -3,6 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import pool from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { updateUser, approveTeacher } from "@/app/dashboard/actions";
+import { parsePositiveInt } from "@/lib/validation";
 
 export const dynamic = "force-dynamic";
 
@@ -14,18 +15,21 @@ export default async function EditUserPage({ params, searchParams }) {
 
   const { id } = await params;
   const sp = await searchParams;
-  if (!Number.isInteger(Number(id))) {
+  const targetId = parsePositiveInt(id);
+  if (!targetId) {
     notFound();
   }
 
   const { rows } = await pool.query(
     "SELECT id, username, email, role, status, approved_at FROM users WHERE id = $1",
-    [Number(id)]
+    [targetId]
   );
   const targetUser = rows[0];
   if (!targetUser) {
     notFound();
   }
+
+  const isEditingSelf = targetUser.id === currentUser.id;
 
   return (
     <div className="max-w-xl space-y-6">
@@ -81,6 +85,7 @@ export default async function EditUserPage({ params, searchParams }) {
             <input
               type="text"
               name="username"
+              maxLength={100}
               defaultValue={targetUser.username}
               required
               className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500"
@@ -94,6 +99,7 @@ export default async function EditUserPage({ params, searchParams }) {
             <input
               type="email"
               name="email"
+              maxLength={100}
               defaultValue={targetUser.email}
               required
               className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500"
@@ -107,7 +113,8 @@ export default async function EditUserPage({ params, searchParams }) {
             <input
               type="password"
               name="password"
-              placeholder="Kosongkan jika tidak ingin mengubah kata sandi"
+              minLength={6}
+              placeholder="Kosongkan jika tidak ingin mengubah kata sandi (min. 6 karakter)"
               className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500"
             />
           </div>
@@ -117,29 +124,53 @@ export default async function EditUserPage({ params, searchParams }) {
               <label className="block text-sm font-bold text-slate-700 mb-1.5">
                 Role
               </label>
-              <select
-                name="role"
-                defaultValue={targetUser.role}
-                className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-              >
-                <option value="student">Student</option>
-                <option value="teacher">Teacher</option>
-                <option value="admin">Admin</option>
-              </select>
+              {isEditingSelf ? (
+                <>
+                  <input type="hidden" name="role" value={targetUser.role} />
+                  <input
+                    type="text"
+                    value="Admin (Akun Anda)"
+                    readOnly
+                    className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-bold text-slate-600"
+                  />
+                </>
+              ) : (
+                <select
+                  name="role"
+                  defaultValue={targetUser.role}
+                  className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                >
+                  <option value="student">Student</option>
+                  <option value="teacher">Teacher</option>
+                  <option value="admin">Admin</option>
+                </select>
+              )}
             </div>
 
             <div>
               <label className="block text-sm font-bold text-slate-700 mb-1.5">
                 Status Akun
               </label>
-              <select
-                name="status"
-                defaultValue={targetUser.status}
-                className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-              >
-                <option value="active">Active</option>
-                <option value="pending">Pending</option>
-              </select>
+              {isEditingSelf ? (
+                <>
+                  <input type="hidden" name="status" value={targetUser.status} />
+                  <input
+                    type="text"
+                    value="Active"
+                    readOnly
+                    className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-bold text-slate-600"
+                  />
+                </>
+              ) : (
+                <select
+                  name="status"
+                  defaultValue={targetUser.status}
+                  className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                >
+                  <option value="active">Active</option>
+                  <option value="pending">Pending</option>
+                </select>
+              )}
             </div>
           </div>
 

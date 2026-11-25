@@ -4,6 +4,7 @@ import pool from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { updateContent } from "@/app/dashboard/actions";
 import ContentTextareaWithPreview from "@/components/ContentTextareaWithPreview";
+import { parsePositiveInt } from "@/lib/validation";
 
 export const dynamic = "force-dynamic";
 
@@ -15,12 +16,11 @@ export default async function EditCourseContentPage({ params, searchParams }) {
 
   const { id, contentId } = await params;
   const sp = await searchParams;
-  if (!Number.isInteger(Number(id)) || !Number.isInteger(Number(contentId))) {
+  const courseId = parsePositiveInt(id);
+  const matId = parsePositiveInt(contentId);
+  if (!courseId || !matId) {
     notFound();
   }
-
-  const courseId = Number(id);
-  const matId = Number(contentId);
 
   const { rows } = await pool.query(
     `SELECT cc.*, c.teacher_id, c.title AS course_title

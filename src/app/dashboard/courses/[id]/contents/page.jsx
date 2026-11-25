@@ -6,6 +6,7 @@ import { createContent, deleteContent } from "@/app/dashboard/actions";
 import DeleteConfirmButton from "@/components/DeleteConfirmButton";
 import ContentTextareaWithPreview from "@/components/ContentTextareaWithPreview";
 import { extractYouTubeIdsFromText } from "@/lib/youtube";
+import { parsePositiveInt } from "@/lib/validation";
 
 export const dynamic = "force-dynamic";
 
@@ -20,10 +21,10 @@ export default async function CourseContentsManagementPage({
 
   const { id } = await params;
   const sp = await searchParams;
-  if (!Number.isInteger(Number(id))) {
+  const courseId = parsePositiveInt(id);
+  if (!courseId) {
     notFound();
   }
-  const courseId = Number(id);
 
   const { rows: courseRows } = await pool.query(
     `SELECT c.*, cat.name AS category_name, u.username AS teacher_name
@@ -253,7 +254,10 @@ export default async function CourseContentsManagementPage({
                 {studentProgress.map((st) => {
                   const pct =
                     contents.length > 0
-                      ? Math.round((st.completed_count / contents.length) * 100)
+                      ? Math.min(
+                          100,
+                          Math.round((st.completed_count / contents.length) * 100)
+                        )
                       : 0;
                   return (
                     <tr key={st.student_id}>

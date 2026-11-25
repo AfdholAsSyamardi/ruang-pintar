@@ -282,7 +282,10 @@ export default async function DashboardPage() {
             {studentCourses.map((c) => {
               const pct =
                 c.total_contents > 0
-                  ? Math.round((c.completed_contents / c.total_contents) * 100)
+                  ? Math.min(
+                      100,
+                      Math.round((c.completed_contents / c.total_contents) * 100)
+                    )
                   : 0;
               return (
                 <div

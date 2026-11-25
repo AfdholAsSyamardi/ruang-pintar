@@ -3,6 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import pool from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { updateCategory } from "@/app/dashboard/actions";
+import { parsePositiveInt } from "@/lib/validation";
 
 export const dynamic = "force-dynamic";
 
@@ -14,13 +15,14 @@ export default async function EditCategoryPage({ params, searchParams }) {
 
   const { id } = await params;
   const sp = await searchParams;
-  if (!Number.isInteger(Number(id))) {
+  const categoryId = parsePositiveInt(id);
+  if (!categoryId) {
     notFound();
   }
 
   const { rows } = await pool.query(
     "SELECT id, name FROM categories WHERE id = $1",
-    [Number(id)]
+    [categoryId]
   );
   const category = rows[0];
   if (!category) {
