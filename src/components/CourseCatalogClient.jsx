@@ -188,128 +188,128 @@ export default function CourseCatalogClient({
                 className={
                   isHomePopular
                     ? "bg-white border border-slate-200 hover:border-emerald-300 rounded-2xl p-6 shadow-xs hover:shadow-lg hover:shadow-emerald-900/5 transition-all flex flex-col"
-                    : `bg-white rounded-2xl p-6 border transition-all flex flex-col shadow-xs ${
+                    : `bg-white rounded-2xl p-6 border transition-all flex flex-col shadow-xs hover:shadow-lg hover:shadow-emerald-900/5 ${
                         isEnrolled
                           ? "border-emerald-300 ring-1 ring-emerald-100"
                           : "border-slate-200 hover:border-emerald-300"
                       }`
                 }
               >
-                <div className="flex items-center justify-between gap-2 mb-3">
-                  <div className="flex items-center gap-2">
-                    <span className="px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-bold">
-                      {course.category_name || "Umum"}
-                    </span>
-                    {!isHomePopular &&
-                      user?.role === "teacher" &&
-                      course.teacher_id === user.id && (
-                        <span className="px-2.5 py-0.5 rounded-full bg-emerald-600 text-white text-[10px] font-bold uppercase">
-                          Kelas Anda
-                        </span>
-                      )}
-                  </div>
-
-                  {isHomePopular ? (
+                <Link
+                  href={`/courses/${course.id}`}
+                  className="block flex-1 group cursor-pointer"
+                >
+                  <div className="flex items-center justify-between gap-2 mb-3">
                     <div className="flex items-center gap-2">
-                      {user?.role === "teacher" &&
+                      <span className="px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-bold">
+                        {course.category_name || "Umum"}
+                      </span>
+                      {!isHomePopular &&
+                        user?.role === "teacher" &&
                         course.teacher_id === user.id && (
                           <span className="px-2.5 py-0.5 rounded-full bg-emerald-600 text-white text-[10px] font-bold uppercase">
                             Kelas Anda
                           </span>
                         )}
-                      <span className="text-xs font-bold text-slate-400">
-                        #{index + 1} Terpopuler
-                      </span>
                     </div>
-                  ) : (
-                    <span
-                      className={`px-2.5 py-1 rounded-full text-[11px] font-bold ${
-                        !course.start_date && !course.end_date
-                          ? "bg-teal-50 text-teal-700"
-                          : "bg-slate-100 text-slate-600"
-                      }`}
-                    >
-                      {formatDateRange(course.start_date, course.end_date)}
-                    </span>
-                  )}
-                </div>
 
-                <h3
-                  className={
-                    isHomePopular
-                      ? "text-lg font-extrabold text-slate-900 mb-2 leading-snug"
-                      : "text-xl font-extrabold text-slate-900 mb-2"
-                  }
-                >
-                  <Link
-                    href={`/courses/${course.id}`}
-                    className="hover:text-emerald-600 transition-colors"
-                  >
-                    {course.title}
-                  </Link>
-                </h3>
-
-                <p className="text-sm text-slate-600 line-clamp-3 mb-4 leading-relaxed">
-                  {course.description}
-                </p>
-
-                <div className="text-xs text-slate-500 space-y-1.5 mb-5">
-                  <p>
-                    Pengajar:{" "}
-                    <span
-                      className={
-                        isHomePopular
-                          ? "font-bold text-slate-700"
-                          : "font-bold text-slate-800"
-                      }
-                    >
-                      {course.teacher_name || "Pengajar"}
-                    </span>
-                  </p>
-                  {isHomePopular && (
-                    <p>
-                      Jadwal:{" "}
-                      <span className="font-semibold text-emerald-700">
+                    {isHomePopular ? (
+                      <div className="flex items-center gap-2">
+                        {user?.role === "teacher" &&
+                          course.teacher_id === user.id && (
+                            <span className="px-2.5 py-0.5 rounded-full bg-emerald-600 text-white text-[10px] font-bold uppercase">
+                              Kelas Anda
+                            </span>
+                          )}
+                        <span className="text-xs font-bold text-slate-400">
+                          #{index + 1} Terpopuler
+                        </span>
+                      </div>
+                    ) : (
+                      <span
+                        className={`px-2.5 py-1 rounded-full text-[11px] font-bold ${
+                          !course.start_date && !course.end_date
+                            ? "bg-teal-50 text-teal-700"
+                            : "bg-slate-100 text-slate-600"
+                        }`}
+                      >
                         {formatDateRange(course.start_date, course.end_date)}
                       </span>
-                    </p>
-                  )}
-                  <p>
-                    {course.content_count} Materi • {course.student_count}{" "}
-                    {isHomePopular ? "Siswa Terdaftar" : "Siswa Mengikuti"}
-                  </p>
-                </div>
+                    )}
+                  </div>
 
-                {isEnrolled &&
-                  (isHomePopular ? (
-                    <div className="mb-4">
-                      <div className="flex justify-between text-xs font-bold text-emerald-700 mb-1">
-                        <span>Progres Belajar</span>
-                        <span>{progressPct}%</span>
-                      </div>
-                      <div className="w-full h-2 bg-emerald-100 rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-emerald-600 rounded-full transition-all"
-                          style={{ width: `${progressPct}%` }}
-                        />
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="mb-5 bg-emerald-50/70 border border-emerald-100 rounded-xl p-3">
-                      <div className="flex justify-between items-center text-xs font-bold text-emerald-800 mb-1.5">
-                        <span>
-                          {completedCount}/{course.content_count} Materi Selesai
+                  <h3
+                    className={
+                      isHomePopular
+                        ? "text-lg font-extrabold text-slate-900 group-hover:text-emerald-600 transition-colors mb-2 leading-snug"
+                        : "text-xl font-extrabold text-slate-900 group-hover:text-emerald-600 transition-colors mb-2"
+                    }
+                  >
+                    {course.title}
+                  </h3>
+
+                  <p className="text-sm text-slate-600 line-clamp-3 mb-4 leading-relaxed">
+                    {course.description}
+                  </p>
+
+                  <div className="text-xs text-slate-500 space-y-1.5 mb-5">
+                    <p>
+                      Pengajar:{" "}
+                      <span
+                        className={
+                          isHomePopular
+                            ? "font-bold text-slate-700"
+                            : "font-bold text-slate-800"
+                        }
+                      >
+                        {course.teacher_name || "Pengajar"}
+                      </span>
+                    </p>
+                    {isHomePopular && (
+                      <p>
+                        Jadwal:{" "}
+                        <span className="font-semibold text-emerald-700">
+                          {formatDateRange(course.start_date, course.end_date)}
                         </span>
-                        <span>{progressPct}%</span>
+                      </p>
+                    )}
+                    <p>
+                      {course.content_count} Materi • {course.student_count}{" "}
+                      {isHomePopular ? "Siswa Terdaftar" : "Siswa Mengikuti"}
+                    </p>
+                  </div>
+
+                  {isEnrolled &&
+                    (isHomePopular ? (
+                      <div className="mb-4">
+                        <div className="flex justify-between text-xs font-bold text-emerald-700 mb-1">
+                          <span>Progres Belajar</span>
+                          <span>{progressPct}%</span>
+                        </div>
+                        <div className="w-full h-2 bg-emerald-100 rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-emerald-600 rounded-full transition-all"
+                            style={{ width: `${progressPct}%` }}
+                          />
+                        </div>
                       </div>
-                      <div className="w-full h-2 bg-emerald-100 rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-emerald-600 rounded-full transition-all"
-                          style={{ width: `${progressPct}%` }}
-                        />
+                    ) : (
+                      <div className="mb-5 bg-emerald-50/70 border border-emerald-100 rounded-xl p-3">
+                        <div className="flex justify-between items-center text-xs font-bold text-emerald-800 mb-1.5">
+                          <span>
+                            {completedCount}/{course.content_count} Materi Selesai
+                          </span>
+                          <span>{progressPct}%</span>
+                        </div>
+                        <div className="w-full h-2 bg-emerald-100 rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-emerald-600 rounded-full transition-all"
+                            style={{ width: `${progressPct}%` }}
+                          />
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    ))}
+                </Link>
 
                 <div className="mt-auto pt-4 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2">
                   {isHomePopular ? (
