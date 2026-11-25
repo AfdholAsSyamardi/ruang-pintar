@@ -1,18 +1,45 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import pool from "@/lib/db";
+import { isValidEmail } from "@/lib/validation";
 
 export async function POST(request) {
   try {
-    const body = await request.json();
-    const username = body?.username?.trim();
-    const email = body?.email?.trim().toLowerCase();
-    const password = body?.password || "";
-    const registerAs = body?.registerAs || "student";
+    let body;
+    try {
+      body = await request.json();
+    } catch {
+      return NextResponse.json(
+        { message: "Format permintaan tidak valid." },
+        { status: 400 }
+      );
+    }
+
+    const username =
+      typeof body?.username === "string" ? body.username.trim() : "";
+    const email =
+      typeof body?.email === "string" ? body.email.trim().toLowerCase() : "";
+    const password = typeof body?.password === "string" ? body.password : "";
+    const registerAs =
+      typeof body?.registerAs === "string" ? body.registerAs : "student";
 
     if (!username || !email || !password) {
       return NextResponse.json(
         { message: "Nama lengkap, email, dan kata sandi wajib diisi." },
+        { status: 400 }
+      );
+    }
+
+    if (username.length > 100 || email.length > 100) {
+      return NextResponse.json(
+        { message: "Nama lengkap dan email maksimal 100 karakter." },
+        { status: 400 }
+      );
+    }
+
+    if (!isValidEmail(email)) {
+      return NextResponse.json(
+        { message: "Format email tidak valid." },
         { status: 400 }
       );
     }

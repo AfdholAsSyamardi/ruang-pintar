@@ -5,9 +5,19 @@ import { encrypt, SESSION_COOKIE_NAME } from "@/lib/session";
 
 export async function POST(request) {
   try {
-    const body = await request.json();
-    const email = body?.email?.trim().toLowerCase();
-    const password = body?.password || "";
+    let body;
+    try {
+      body = await request.json();
+    } catch {
+      return NextResponse.json(
+        { message: "Format permintaan tidak valid." },
+        { status: 400 }
+      );
+    }
+
+    const email =
+      typeof body?.email === "string" ? body.email.trim().toLowerCase() : "";
+    const password = typeof body?.password === "string" ? body.password : "";
 
     if (!email || !password) {
       return NextResponse.json(

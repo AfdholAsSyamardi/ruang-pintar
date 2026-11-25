@@ -1,11 +1,12 @@
 import { NextResponse } from "next/server";
 import pool from "@/lib/db";
+import { parsePositiveInt } from "@/lib/validation";
 
 export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
     const q = (searchParams.get("q") || "").trim();
-    const categoryId = searchParams.get("category");
+    const categoryId = parsePositiveInt(searchParams.get("category"));
 
     const params = [];
     const conditions = [];
@@ -17,8 +18,8 @@ export async function GET(request) {
       );
     }
 
-    if (categoryId && Number.isInteger(Number(categoryId))) {
-      params.push(Number(categoryId));
+    if (categoryId) {
+      params.push(categoryId);
       conditions.push(`c.category_id = $${params.length}`);
     }
 
