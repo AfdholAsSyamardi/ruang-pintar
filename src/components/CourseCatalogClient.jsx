@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { enrollCourse } from "@/app/actions";
 
 function formatDateRange(startDate, endDate) {
   if (!startDate && !endDate) return "Lifetime Access";
@@ -157,12 +158,27 @@ export default function CourseCatalogClient({
               >
                 Lanjutkan Belajar →
               </Link>
+            ) : user?.role === "student" ? (
+              <form action={enrollCourse}>
+                <input type="hidden" name="course_id" value={course.id} />
+                <input
+                  type="hidden"
+                  name="redirect_to"
+                  value={`/courses/${course.id}`}
+                />
+                <button
+                  type="submit"
+                  className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-colors cursor-pointer"
+                >
+                  Ikuti Course
+                </button>
+              </form>
             ) : (
               <Link
-                href={`/courses/${course.id}`}
+                href="/login"
                 className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-colors"
               >
-                Lihat Kursus →
+                Ikuti Course
               </Link>
             );
 
