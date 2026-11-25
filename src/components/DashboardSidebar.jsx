@@ -38,6 +38,7 @@ export default function DashboardSidebar({ user }) {
     setLoggingOut(true);
     try {
       await fetch("/api/logout", { method: "POST" });
+      setMobileOpen(false);
       router.push("/login");
       router.refresh();
     } finally {

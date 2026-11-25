@@ -16,14 +16,16 @@ export const dynamic = "force-dynamic";
 
 function formatDateRange(startDate, endDate) {
   if (!startDate && !endDate) return "Lifetime Access";
-  const fmt = (d) =>
-    d
-      ? new Date(d).toLocaleDateString("id-ID", {
-          day: "numeric",
-          month: "short",
-          year: "numeric",
-        })
-      : "-";
+  const fmt = (d) => {
+    if (!d) return "-";
+    const date = new Date(d);
+    if (Number.isNaN(date.getTime())) return "-";
+    return date.toLocaleDateString("id-ID", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
+  };
   return `${fmt(startDate)} – ${fmt(endDate)}`;
 }
 
@@ -162,7 +164,9 @@ export default async function CourseDetailPage({ params, searchParams }) {
     : [];
 
   const isOwnerOrAdmin =
-    user && (user.role === "admin" || user.id === course.teacher_id);
+    user &&
+    (user.role === "admin" ||
+      (user.role === "teacher" && user.id === course.teacher_id));
   const isTeacherOrAdmin =
     user && (user.role === "admin" || user.role === "teacher");
 
@@ -187,7 +191,7 @@ export default async function CourseDetailPage({ params, searchParams }) {
               )}`}
               className="px-4 py-2 rounded-xl bg-white border border-slate-200 hover:border-emerald-300 text-xs font-bold text-slate-700 hover:text-emerald-700 transition-colors"
             >
-              Hubungi Teacher ({course.teacher_name})
+              Hubungi Teacher ({course.teacher_name || "Pengajar"})
             </a>
           )}
         </div>
@@ -212,7 +216,7 @@ export default async function CourseDetailPage({ params, searchParams }) {
               <p className="text-xs font-semibold text-slate-500">
                 Pengajar:{" "}
                 <span className="text-slate-800 font-bold">
-                  {course.teacher_name}
+                  {course.teacher_name || "Pengajar"}
                 </span>{" "}
                 • {totalContents} Materi Pembelajaran
               </p>

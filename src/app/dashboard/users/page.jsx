@@ -142,6 +142,7 @@ export default async function UsersManagementPage({ searchParams }) {
           <input
             type="text"
             name="username"
+            maxLength={100}
             required
             placeholder="Username / Nama"
             className="rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500"
@@ -149,6 +150,7 @@ export default async function UsersManagementPage({ searchParams }) {
           <input
             type="email"
             name="email"
+            maxLength={100}
             required
             placeholder="Email"
             className="rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500"

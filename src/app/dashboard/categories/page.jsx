@@ -60,6 +60,7 @@ export default async function CategoriesManagementPage({ searchParams }) {
           <input
             type="text"
             name="name"
+            maxLength={100}
             required
             placeholder="Contoh: Teknologi, Web Development, Data Science"
             className="flex-1 rounded-xl border border-slate-300 px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500"

@@ -171,12 +171,17 @@ export async function approveTeacher(formData) {
   }
 
   const id = parsePositiveInt(formData.get("id")?.toString());
-  if (!id) return;
+  if (!id || id === currentUser.id) {
+    redirect("/dashboard/users?error=Aksi+verifikasi+tidak+valid");
+  }
 
-  await pool.query(
-    "UPDATE users SET role = 'teacher', status = 'active', approved_at = CURRENT_TIMESTAMP WHERE id = $1",
+  const { rowCount } = await pool.query(
+    "UPDATE users SET role = 'teacher', status = 'active', approved_at = CURRENT_TIMESTAMP WHERE id = $1 AND status = 'pending' AND role = 'student'",
     [id]
   );
+  if (rowCount === 0) {
+    redirect("/dashboard/users?error=User+tidak+dalam+status+pending+pengajar");
+  }
   await pool.query("DELETE FROM enrollments WHERE student_id = $1", [id]);
 
   revalidatePath("/dashboard/users");
@@ -316,6 +321,13 @@ export async function createCourse(formData) {
     if (!selectedTeacher) {
       redirect("/dashboard/courses?error=Pilih+teacher+yang+valid");
     }
+    const { rows: teacherCheck } = await pool.query(
+      "SELECT id FROM users WHERE id = $1 AND role = 'teacher'",
+      [selectedTeacher]
+    );
+    if (teacherCheck.length === 0) {
+      redirect("/dashboard/courses?error=Pengguna+yang+dipilih+bukan+teacher+aktif");
+    }
     teacherId = selectedTeacher;
   }
 
@@ -402,6 +414,15 @@ export async function updateCourse(formData) {
       if (!selectedTeacher) {
         redirect(
           `/dashboard/courses/${id}/edit?error=Pilih+teacher+yang+valid`
+        );
+      }
+      const { rows: teacherCheck } = await pool.query(
+        "SELECT id FROM users WHERE id = $1 AND role = 'teacher'",
+        [selectedTeacher]
+      );
+      if (teacherCheck.length === 0) {
+        redirect(
+          `/dashboard/courses/${id}/edit?error=Pengguna+yang+dipilih+bukan+teacher+aktif`
         );
       }
       await pool.query(

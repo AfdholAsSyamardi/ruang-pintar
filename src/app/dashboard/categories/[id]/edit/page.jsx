@@ -60,6 +60,7 @@ export default async function EditCategoryPage({ params, searchParams }) {
             <input
               type="text"
               name="name"
+              maxLength={100}
               defaultValue={category.name}
               required
               className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500"

@@ -6,14 +6,16 @@ import { enrollCourse } from "@/app/actions";
 
 function formatDateRange(startDate, endDate) {
   if (!startDate && !endDate) return "Lifetime Access";
-  const fmt = (d) =>
-    d
-      ? new Date(d).toLocaleDateString("id-ID", {
-          day: "numeric",
-          month: "short",
-          year: "numeric",
-        })
-      : "-";
+  const fmt = (d) => {
+    if (!d) return "-";
+    const date = new Date(d);
+    if (Number.isNaN(date.getTime())) return "-";
+    return date.toLocaleDateString("id-ID", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
+  };
   return `${fmt(startDate)} – ${fmt(endDate)}`;
 }
 

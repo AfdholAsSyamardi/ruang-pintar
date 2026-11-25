@@ -87,6 +87,7 @@ export default async function CoursesManagementPage({ searchParams }) {
               <input
                 type="text"
                 name="title"
+                maxLength={255}
                 required
                 placeholder="Contoh: Fundamental Next.js & SQL"
                 className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500"

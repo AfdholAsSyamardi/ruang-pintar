@@ -6,7 +6,12 @@ export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
     const q = (searchParams.get("q") || "").trim();
-    const categoryId = parsePositiveInt(searchParams.get("category"));
+    const rawCategory = (searchParams.get("category") || "").trim();
+    const categoryId = parsePositiveInt(rawCategory);
+
+    if (rawCategory && !categoryId) {
+      return NextResponse.json({ courses: [] }, { status: 200 });
+    }
 
     const params = [];
     const conditions = [];
